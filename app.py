@@ -1,5 +1,5 @@
 import streamlit as st
-import cv2
+import opencv-python-headless
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
@@ -53,4 +53,17 @@ if uploaded_file is not None:
             "Download Result",
             file,
             file_name="result.jpg"
+        )import os
+
+result_path = "runs/detect/predict/image0.jpg"
+
+if os.path.exists(result_path):
+    with open(result_path, "rb") as file:
+        st.download_button(
+            label="Download Result",
+            data=file,
+            file_name="result.jpg",
+            mime="image/jpeg"
         )
+else:
+    st.warning("Result image not found")
