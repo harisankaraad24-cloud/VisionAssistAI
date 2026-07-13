@@ -1,23 +1,16 @@
 import streamlit as st
-import cv2
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
-import os
+import io
 
-st.set_page_config(
-    page_title="VisionAssist AI",
-    layout="wide"
-)
+st.set_page_config(page_title="VisionAssist AI", layout="wide")
 
 st.title("👁️ VisionAssist AI")
 st.write("Upload an image for object detection using YOLOv8.")
 
-# Load YOLO model
+# Load model
 model = YOLO("yolov8n.pt")
-
-# Create outputs folder if it doesn't exist
-os.makedirs("outputs", exist_ok=True)
 
 uploaded_file = st.file_uploader(
     "Choose an image",
@@ -27,16 +20,15 @@ uploaded_file = st.file_uploader(
 if uploaded_file is not None:
 
     image = Image.open(uploaded_file).convert("RGB")
-
     image_np = np.array(image)
 
-    results = model(image_np)
+    with st.spinner("Detecting objects..."):
+        results = model(image_np)
 
     annotated = results[0].plot()
 
     st.image(
         annotated,
-        channels="BGR",
         caption="Detection Result",
         width="stretch"
     )
@@ -53,14 +45,16 @@ if uploaded_file is not None:
 
             st.write(f"• {name} ({conf:.2f})")
 
-    output_path = "outputs/result.jpg"
+    # Save image using Pillow (NO OpenCV)
+    img = Image.fromarray(annotated[:, :, ::-1])
 
-    cv2.imwrite(output_path, annotated)
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG")
+    buffer.seek(0)
 
-    with open(output_path, "rb") as file:
-        st.download_button(
-            label="📥 Download Result",
-            data=file,
-            file_name="result.jpg",
-            mime="image/jpeg"
-        )
+    st.download_button(
+        "📥 Download Result",
+        data=buffer,
+        file_name="result.jpg",
+        mime="image/jpeg"
+    )
