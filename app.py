@@ -48,23 +48,10 @@ if uploaded_file is not None:
 
     cv2.imwrite("outputs/result.jpg", annotated)
 
-    with open("outputs/result.jpg", "rb") as file:
-
+    with open("ouput/result.jpg","rb") as file:
         st.download_button(
-            "Download Result",
-            file,
-            file_name="result.jpg"
-        )import os
-
-result_path = "runs/detect/predict/image0.jpg"
-
-if os.path.exists(result_path):
-    with open(result_path, "rb") as file:
-        st.download_button(
-            label="Download Result",
+            label="download Result",
             data=file,
             file_name="result.jpg",
-            mime="image/jpeg"
+            mine="image/jpeg"
         )
-else:
-    st.warning("Result image not found")
